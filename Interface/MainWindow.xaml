@@ -1,0 +1,50 @@
+﻿<Window x:Class="Interface.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Interface" 
+        xmlns:local1="clr-namespace:GeneticLibViewModel"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.Resources>
+        <local:DoubleToStringConverter x:Key="DoubleToStringConverter"/>
+    </Window.Resources>
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="78,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="Rounds:"/></TextBlock>
+        <TextBox x:Name="Rounds" Text="{Binding Rounds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="22" Margin="144,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="83,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="Courts:"/></TextBlock>
+        <TextBox x:Name="Courts" Text="{Binding Courts, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="22" Margin="144,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="81,128,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="Players:"/></TextBlock>
+        <TextBox x:Name="Players" Text="{Binding Players, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="22" Margin="144,128,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="46,165,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="MutationRate:"/></TextBlock>
+        <TextBox x:Name="MutationRate" Text="{Binding MutationRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DoubleToStringConverter}}" HorizontalAlignment="Left" Height="22" Margin="144,165,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="42,202,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="CrossoverRate:"/></TextBlock>
+        <TextBox x:Name="CrossoverRate" Text="{Binding CrossoverRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DoubleToStringConverter}}" HorizontalAlignment="Left" Height="22" Margin="144,202,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="40,238,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="PopulationSize:"/></TextBlock>
+        <TextBox x:Name="PopulationSize" Text="{Binding PopulationSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="22" Margin="144,238,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="18,275,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="MaxPopulationSize:"/></TextBlock>
+        <TextBox x:Name="MaxPopulationSize" Text="{Binding MaxPopulationSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" Height="22" Margin="144,275,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+
+        <TextBlock HorizontalAlignment="Left" Margin="23,312,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="EvolutionStrength:"/></TextBlock>
+        <TextBox x:Name="EvolutionStrength" Text="{Binding EvolutionStrength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource DoubleToStringConverter}}" HorizontalAlignment="Left" Height="22" Margin="144,312,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="80"/>
+        <Border BorderThickness="1" Height="22" Width="80" Margin="144,349,0,0" BorderBrush="Black" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <TextBox Text="{Binding BestRank, Mode=OneWay, IsAsync=True}" HorizontalAlignment="Left" TextAlignment="Center" Width="80" TextWrapping="Wrap" IsReadOnly="True" Margin="0,0,0,-2"  TextChanged="Result_TextChanged"/>
+        </Border>
+
+        <Button Command="{Binding StartCalculation}" Content="Start" HorizontalAlignment="Left" Height="22" Width="60" Margin="259,349,0,0" VerticalAlignment="Top"/>
+        <Button Command="{Binding PauseCalculation}" Content="Pause" HorizontalAlignment="Left" Height="22" Width="60" Margin="329,349,0,0" VerticalAlignment="Top"/>
+        <Button Command="{Binding StopCalculation}" Content="Stop" HorizontalAlignment="Left" Height="22" Width="60" Margin="399,349,0,0" VerticalAlignment="Top"/>
+
+        <DataGrid x:Name="Table" Height="280" Width="460" Margin="259,54,0,0" AutoGenerateColumns="False" IsReadOnly="True" VerticalAlignment="Top" HorizontalAlignment="Left">
+
+        </DataGrid>
+
+    </Grid>
+</Window>

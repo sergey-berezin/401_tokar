@@ -7,8 +7,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <PackageReference Include="Evolution.Lib" Version="1.0.0" />
-  </ItemGroup>
+  </ItemGroup> -->
+
+  <ItemGroup>
+  <ProjectReference Include="..\GeneticProgrammingLib\GeneticProgrammingLib.csproj" />
+</ItemGroup>
 
 </Project>
