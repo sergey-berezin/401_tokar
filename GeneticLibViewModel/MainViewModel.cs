@@ -202,8 +202,9 @@ namespace GeneticLibViewModel
         public ActionCommand? StartCalculation { get; private set; }
         public ActionCommand? PauseCalculation { get; private set; }
         public ActionCommand? StopCalculation { get; private set; }
-        public string Status {  get; private set; }
         private IUIServices UI;
+        public enum Stat { Running, Paused, Stopped }
+        public Stat Status {  get; private set; }
         public MainViewModel(IUIServices UI)
         {
             this.UI = UI;
@@ -215,24 +216,24 @@ namespace GeneticLibViewModel
             CrossoverRate = 0.8;
             PopulationSize = 100;
             MaxPopulationSize = 100;
-            Status = "Stopped";
+            Status = Stat.Stopped;
             StartCalculation = new ActionCommand(StartCalculationExecute, StartCalculationCanExecute);
             PauseCalculation = new ActionCommand((x) => 
-            { 
-                Status = "Paused";
+            {
+                Status = Stat.Paused;
                // RaisePropertyChanged("BestTable");
                 StartCalculation.RaiseCanExecuteChanged();
                 StopCalculation.RaiseCanExecuteChanged();
                 PauseCalculation.RaiseCanExecuteChanged();
-            }, (x) => { return Status == "Running"; });
+            }, (x) => { return Status == Stat.Running; });
             StopCalculation = new ActionCommand((x) => 
             { 
-                Status = "Stopped";
+                Status = Stat.Stopped;
                // RaisePropertyChanged("BestTable");
                 StartCalculation.RaiseCanExecuteChanged(); 
                 PauseCalculation.RaiseCanExecuteChanged();
                 StopCalculation.RaiseCanExecuteChanged();
-            }, (x) => { return Status == "Running" || Status == "Paused"; });
+            }, (x) => { return Status == Stat.Running || Status == Stat.Paused; });
         }
         private bool StartCalculationCanExecute(object? o)
         {
@@ -248,19 +249,19 @@ namespace GeneticLibViewModel
                     res = false;
                 }
             }
-            return res && (Status == "Stopped" || Status == "Paused");
+            return res && (Status == Stat.Stopped || Status == Stat.Paused);
         }
         private void Run()
         {
-            if (Status == "Stopped")
+            if (Status == Stat.Stopped)
                 Evolution = new AsyncEvolution(Rounds, Players, Courts, EvolutionStrength, MutationRate, CrossoverRate, PopulationSize, MaxPopulationSize);
-            Status = "Running";
+            Status = Stat.Running;
             StartCalculation.RaiseCanExecuteChanged();
             PauseCalculation.RaiseCanExecuteChanged();
             StopCalculation.RaiseCanExecuteChanged();
             _ = Task.Factory.StartNew(() =>
             {
-                while (Status == "Running")
+                while (Status == Stat.Running)
                 {
                     Evolution.Step();
                     var br = Evolution.BestRank();
@@ -268,7 +269,7 @@ namespace GeneticLibViewModel
                     BestTable = Evolution.BestTable();
                     RaisePropertyChanged("BestRank");
                 }
-            });
+            }, TaskCreationOptions.LongRunning);
         }
         public void StartCalculationExecute(object? o)
         {
