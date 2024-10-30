@@ -20,7 +20,6 @@ public class ParallelMergeSort<T>
         ParallelMergeSortRecursive(array, tempArray, 0, array.Length, cmp);
     }
 
-
     private static void ParallelMergeSortRecursive(T[] array, T[] tempArray, int left, int right, IComparer<T> cmp)
     {
         const int threshold = 1000;
@@ -47,6 +46,54 @@ public class ParallelMergeSort<T>
         while (i < middle && j < right)
         {
             if (cmp.Compare(array[i], array[j]) != 1)
+                tempArray[k++] = array[i++];
+            else
+                tempArray[k++] = array[j++];
+        }
+        while (i < middle)
+            tempArray[k++] = array[i++];
+        while (j < right)
+            tempArray[k++] = array[j++];
+        for (i = left; i < right; i++)
+        {
+            array[i] = tempArray[i];
+        }
+    }
+}
+
+public class ParallelMergeSort
+{
+    public static void Sort(IComparable[] array)
+    {
+        IComparable[] tempArray = new IComparable[array.Length];
+        ParallelMergeSortRecursive(array, tempArray, 0, array.Length);
+    }
+    private static void ParallelMergeSortRecursive(IComparable[] array, IComparable[] tempArray, int left, int right)
+    {
+        const int threshold = 1000;
+        if (right - left < 2)
+            return;
+        if (right - left < threshold)
+        {
+            Array.Sort(array, left, right - left);
+            return;
+        }
+        int middle = (left + right) / 2;
+        Parallel.Invoke(
+            () => ParallelMergeSortRecursive(array, tempArray, left, middle),
+            () => ParallelMergeSortRecursive(array, tempArray, middle, right)
+        );
+        Merge(array, tempArray, left, middle, right);
+    }
+
+    private static void Merge(IComparable[] array, IComparable[] tempArray, int left, int middle, int right)
+    {
+        int i = left;
+        int j = middle;
+        int k = left;
+        while (i < middle && j < right)
+        {
+            if (array[i].CompareTo(array[j]) != 1)
                 tempArray[k++] = array[i++];
             else
                 tempArray[k++] = array[j++];
