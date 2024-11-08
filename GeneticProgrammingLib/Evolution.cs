@@ -20,13 +20,13 @@ namespace GeneticProgrammingLib {
             }
         }
         public SortedSet<TournamentTable> Population = new SortedSet<TournamentTable>(new TournamentTableComparer());
-        protected double EvolutionStrength;
-        protected double MutationRate;
-        protected double CrossoverRate;
-        protected int Rounds;
-        protected int Players;
-        protected int Courts;
-        protected int MaxPopulationSize;
+        public double EvolutionStrength;
+        public double MutationRate;
+        public double CrossoverRate;
+        public int Rounds;
+        public int Players;
+        public int Courts;
+        public int MaxPopulationSize;
         public int Epoch {get; protected set;}
         protected Evolution() {}
         public Evolution (
@@ -108,6 +108,10 @@ namespace GeneticProgrammingLib {
         }
         public (int, int) BestRank() {
             return Population.Last().Rank;
+        }
+        public Dictionary<int, SortedSet<int>>[] BestTable()
+        {
+            return Population.Last().Table;
         }
     }
 }
