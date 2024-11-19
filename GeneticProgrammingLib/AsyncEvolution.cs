@@ -7,10 +7,10 @@ namespace GeneticProgrammingLib {
                 if (Object.ReferenceEquals(x, y)) {
                     return 0;
                 }
-                if (x.Rank.Item1 > y.Rank.Item1) return 1;
-                if (x.Rank.Item1 < y.Rank.Item1) return -1;
-                if (x.Rank.Item2 > y.Rank.Item2) return 1;
-                if (x.Rank.Item2 < y.Rank.Item2) return -1;
+                if (x.Rank().Item1 > y.Rank().Item1) return 1;
+                if (x.Rank().Item1 < y.Rank().Item1) return -1;
+                if (x.Rank().Item2 > y.Rank().Item2) return 1;
+                if (x.Rank().Item2 < y.Rank().Item2) return -1;
                 if (x.GetHashCode() < y.GetHashCode()) return -1;
                 return 1;
             }
@@ -21,16 +21,16 @@ namespace GeneticProgrammingLib {
                 return 1;
             }
         }
-        public AsyncTournamentTable[] Population;
-        public double EvolutionStrength;
-        public double MutationRate;
-        public double CrossoverRate;
-        public int Rounds;
-        public int Players;
-        public int Courts;
-        public int MaxPopulationSize;
-        public int Epoch {get; protected set;}
-        protected AsyncEvolution() {}
+        public AsyncTournamentTable[] Population { get; set; }
+        public double EvolutionStrength { get; set; }
+        public double MutationRate { get; set; }
+        public double CrossoverRate { get; set; }
+        public int Rounds { get; set; }
+        public int Players { get; set; }
+        public int Courts { get; set; }
+        public int MaxPopulationSize { get; set; }
+        public int Epoch {get; set;}
+        public AsyncEvolution() {}
         public AsyncEvolution (
             int rounds,
             int players,
@@ -64,7 +64,7 @@ namespace GeneticProgrammingLib {
             // Console.WriteLine($"POPULATION BUILD TIME: {stopwatch.ElapsedTicks} ticks {stopwatch.ElapsedMilliseconds} ms");
         }
         public void Step() {
-            // Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new Stopwatch();
             Task[] tasks = new Task[2 * Population.Length];
             ++Epoch;
             int NumSamplesToCrossover = (int)(CrossoverRate * (double)Population.Length);
@@ -75,14 +75,14 @@ namespace GeneticProgrammingLib {
             // stopwatch.Start();
 
             long[] ProbabilitiesToCrossover = new long[NumSamplesToCrossover * 2];
-            long RankSum = Population.Sum(x => x.Rank.Item1);
+            long RankSum = Population.Sum(x => x.Rank().Item1);
             for (int k = 0; k < NumSamplesToCrossover * 2; ++k) {
                 ProbabilitiesToCrossover[k] = rnd.NextInt64(RankSum);
             }
-            Array.Sort(ProbabilitiesToCrossover, new ProbabilitiesComparer());
+            ParallelMergeSort<long>.Sort(ProbabilitiesToCrossover, new ProbabilitiesComparer());
 
             // stopwatch.Stop();
-            // Console.WriteLine($"PROBABILITIES GENERSTION TIME: {stopwatch.ElapsedTicks} ticks {stopwatch.ElapsedMilliseconds} ms");
+            // Console.WriteLine($"PROBABILITIES GENERATION TIME: {stopwatch.ElapsedTicks} ticks {stopwatch.ElapsedMilliseconds} ms");
 
             var ProbabilitiesToCrossoverEnumerator = ProbabilitiesToCrossover.GetEnumerator();
 
@@ -93,7 +93,7 @@ namespace GeneticProgrammingLib {
             long CumulativeRank = 0;
             bool f = true;
             while (PopulationEnumerator.MoveNext() && f) {
-                CumulativeRank += ((AsyncTournamentTable)PopulationEnumerator.Current).Rank.Item1;
+                CumulativeRank += ((AsyncTournamentTable)PopulationEnumerator.Current).Rank().Item1;
                 while ((long)ProbabilitiesToCrossoverEnumerator.Current <= CumulativeRank) {
                     SamplesToCrossover[idx++] = ((AsyncTournamentTable)PopulationEnumerator.Current);
                     if (!(f = ProbabilitiesToCrossoverEnumerator.MoveNext())) break;
@@ -150,7 +150,7 @@ namespace GeneticProgrammingLib {
             
         }
         public (int, int) BestRank() {
-            return Population.Last().Rank;
+            return Population.Last().Rank();
         }
         public Dictionary<int, SortedSet<int>>[] BestTable()
         {

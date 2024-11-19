@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Formats.Tar;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,12 +10,40 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GeneticLibViewModel;
+using System.IO;
+using System.Text.Json;
+using System;
 
 namespace Interface
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    public class RunInfo
+    {
+        public string Name { get; set; }
+        public string FileName { get; set; }
+        public RunInfo(string name, string filename) {
+            Name = name;
+            FileName = filename;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            RunInfo objAsPart = obj as RunInfo;
+            if (objAsPart == null) return false;
+            else return Equals(objAsPart);
+        }
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode() + FileName.GetHashCode();
+        }
+        public bool Equals(RunInfo other)
+        {
+            if (other == null) return false;
+            return (this.Name.Equals(other.Name));
+        }
+    }
     public class DoubleToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -47,6 +76,7 @@ namespace Interface
     }
     public partial class MainWindow : Window, IUIServices
     {
+        public const string RUNSJSON = "runs.json";
         public class Matchup
         {
             public int Round { get; set; }
@@ -107,6 +137,102 @@ namespace Interface
         {
             DataContext = new MainViewModel(this);
             InitializeComponent();
+            if (!File.Exists(RUNSJSON))
+            {
+                try
+                {
+                    File.Create(RUNSJSON);
+                    File.WriteAllText(RUNSJSON, "[]");
+                }
+                catch (Exception ex) 
+                {
+                    MessageBox.Show($"{RUNSJSON} initialization failed: \n{ex.Message}");
+                }
+            }
+        }
+
+        private void SaveClick(object sender, RoutedEventArgs e)
+        {
+            string TMPRUNSJSON = $"tmp_{RUNSJSON}"; // Временный файл для хранения обновленного списка экспериментов
+            string state = ((MainViewModel)DataContext).SaveState();
+            RunInfo Experiment = new RunInfo(ExperimentName.Text,  $"{ExperimentName.Text}-{ExperimentName.Text.GetHashCode()}.json");
+            List<RunInfo> Runs;
+            try // Загружаем данные экпериментов
+            {
+                Runs = JsonSerializer.Deserialize<List<RunInfo>>(File.ReadAllText(RUNSJSON));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error occured while reading from {RUNSJSON}:\n{ex.Message}");
+                return;
+            }
+            if (Runs.Contains(Experiment)) // Если эксперимент с таким именем уже есть, то возвращаем ошибку
+            {
+                MessageBox.Show($"Experiment with name: \"{Experiment.Name}\" already exists.");
+                return;
+            }
+            try // Сохраняем эксперимент
+            {
+                File.WriteAllText(Experiment.FileName, state);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error occured while writing file:\n{ex.Message}");
+                if (File.Exists(Experiment.FileName)) // Удаляем файл если он был создан но не записан
+                {
+                    File.Delete(Experiment.FileName); // И в принипе при любых ошибках удаляем этот файл
+                }
+                return;
+            }
+            Runs.Add(Experiment);
+            try // Сохраняем обновленный список экспериментов 
+            {
+                File.WriteAllText(TMPRUNSJSON, JsonSerializer.Serialize(Runs));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error occured while writing in {RUNSJSON}:\n{ex.Message}");
+                if (File.Exists(TMPRUNSJSON))
+                {
+                    File.Delete(TMPRUNSJSON);
+                }
+                File.Delete(Experiment.FileName);
+                return;
+            }
+            try // Перезаписываем файл с информацией об экспериментах
+            {
+                File.Move(TMPRUNSJSON, RUNSJSON, true);
+            }
+            catch (Exception ex) 
+            { 
+                MessageBox.Show($"Unable to rewrite {RUNSJSON}:\n{ex.Message}");
+                File.Delete(Experiment.FileName);
+                return; 
+            }
+            finally
+            {
+                File.Delete(TMPRUNSJSON); // Временный файл должен быть удален в любом случае
+            }
+            MessageBox.Show("Saved.");
+        }
+
+        private void LoadClick(object sender, RoutedEventArgs e)
+        {
+            SaveWindow DialogWindow = new SaveWindow();
+            DialogWindow.ShowDialog();
+            if (!(bool)DialogWindow.DialogResult)
+            {
+                return;
+            }
+            try
+            {
+                string file_content = File.ReadAllText(DialogWindow.RunFileName);
+                ((MainViewModel)DataContext).LoadState(file_content);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error occured while reading data: {ex.Message}");
+            }
         }
     }
 }
