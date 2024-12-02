@@ -41,10 +41,13 @@
         <Button Command="{Binding StartCalculation}" Content="Start" HorizontalAlignment="Left" Height="22" Width="60" Margin="259,349,0,0" VerticalAlignment="Top"/>
         <Button Command="{Binding PauseCalculation}" Content="Pause" HorizontalAlignment="Left" Height="22" Width="60" Margin="329,349,0,0" VerticalAlignment="Top"/>
         <Button Command="{Binding StopCalculation}" Content="Stop" HorizontalAlignment="Left" Height="22" Width="60" Margin="399,349,0,0" VerticalAlignment="Top"/>
+        <Button Content="Save" HorizontalAlignment="Left" Height="22" Width="60" Margin="659,381,0,0" VerticalAlignment="Top" Click="SaveClick"/>
+        <Button Content="Load" HorizontalAlignment="Left" Height="22" Width="60" Margin="589,381,0,0" VerticalAlignment="Top" Click="LoadClick"/>
 
         <DataGrid x:Name="Table" Height="280" Width="460" Margin="259,54,0,0" AutoGenerateColumns="False" IsReadOnly="True" VerticalAlignment="Top" HorizontalAlignment="Left">
 
         </DataGrid>
+        <TextBox x:Name="ExperimentName" HorizontalAlignment="Left" Height="22" Margin="545,349,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="174"/>
 
     </Grid>
 </Window>

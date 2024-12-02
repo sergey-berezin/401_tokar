@@ -1,43 +1,32 @@
 namespace GeneticProgrammingLib {
     public class AsyncTournamentTable {
-        public Dictionary<int, SortedSet<int>>[] Table {get; private set;}
-        public int[,] RawTable {
-            get {
-                int[,] result = new int[R, N];
-                for (int i = 0; i < R; ++i)
-                    foreach (var pair in Table[i])
-                        foreach (var player in pair.Value)
-                            result[i, player] = pair.Key;
-                return result;
-            }
-        }
-        public int R {get; private set;}
-        public int N {get; private set;}
+        public Dictionary<int, SortedSet<int>>[] Table {get; set;}
+        public int R {get; set;}
+        public int N {get; set;}
         private (int, int)? rank = null;
-        public (int, int) Rank {
-            get {
-                if (rank is null) {
+        public (int, int) Rank() {
+            if (rank is null) {
                     
-                    HashSet<int>[] Courts = new HashSet<int>[N];
-                    SortedSet<int>[] Opponents = new SortedSet<int>[N];
-                    for (int i = 0; i < N; ++i) {
-                        Courts[i] = new HashSet<int>();
-                        Opponents[i] = new SortedSet<int>();
-                    }
+                HashSet<int>[] Courts = new HashSet<int>[N];
+                SortedSet<int>[] Opponents = new SortedSet<int>[N];
+                for (int i = 0; i < N; ++i) {
+                    Courts[i] = new HashSet<int>();
+                    Opponents[i] = new SortedSet<int>();
+                }
                     
-                    for (int i = 0; i < R; ++i) {
-                        foreach (var court in Table[i]) {
-                            foreach (int participant in court.Value) {
-                                Opponents[participant].UnionWith(court.Value);
-                                Courts[participant].Add(court.Key);
-                            }
+                for (int i = 0; i < R; ++i) {
+                    foreach (var court in Table[i]) {
+                        foreach (int participant in court.Value) {
+                            Opponents[participant].UnionWith(court.Value);
+                            Courts[participant].Add(court.Key);
                         }
                     }
-                    rank = (Opponents.Min(x => x.Count) - 1, Courts.Min(x => x.Count));
                 }
-                return ((int, int)) rank;
+                rank = (Opponents.Min(x => x.Count) - 1, Courts.Min(x => x.Count));
             }
+            return ((int, int)) rank;
         }
+        public AsyncTournamentTable() { }
         public AsyncTournamentTable(int[,] table) {
             R = table.GetUpperBound(0) + 1;
             N = table.GetUpperBound(1) + 1;

@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace GeneticLibViewModel
 {
@@ -281,6 +281,39 @@ namespace GeneticLibViewModel
             {
                 UI.ErrorReport($"Some Error Happened\n{ex.Message}");
             }
+        }
+        public string SaveState()
+        {
+            Status = Stat.Paused;
+            StartCalculation.RaiseCanExecuteChanged();
+            PauseCalculation.RaiseCanExecuteChanged();
+            StopCalculation.RaiseCanExecuteChanged();
+            return JsonSerializer.Serialize(this.Evolution);
+        }
+        public void LoadState(string state)
+        {
+            Status = Stat.Paused;
+            var backup = Evolution;
+            try
+            {
+                Evolution = JsonSerializer.Deserialize<AsyncEvolution>(state);
+            }
+            catch (Exception ex)
+            {
+                Evolution = backup;
+                UI.ErrorReport($"Could not load data: \n{ex.Message}");
+                return;
+            }
+            if (Evolution.Epoch != 0)
+            {
+                var br = Evolution.BestRank();
+                BestRank = $"{br.Item1} : {br.Item2}";
+                BestTable = Evolution.BestTable();
+                RaisePropertyChanged("BestRank");
+            }
+            StartCalculation.RaiseCanExecuteChanged();
+            PauseCalculation.RaiseCanExecuteChanged();
+            StopCalculation.RaiseCanExecuteChanged();
         }
     }
 }
